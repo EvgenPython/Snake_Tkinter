@@ -22,13 +22,13 @@ class Cell:
         self.canvas.tag_bind(self.rect, "<Button-1>", self.on_click)
 
     def on_click(self, event):
-        if self.click_callback and self.owner == "comp":
+        if self.click_callback and self.owner == "computer":
             self.click_callback(self)
 
     def mark_hit(self, hit):
         self.hit = True
         color = "red" if hit else "gray"
-        self.canvas.itemconfig(self.rect, color)
+        self.canvas.itemconfig(self.rect, fill=color)
 
 
 class Board:
@@ -38,6 +38,7 @@ class Board:
         self.owner = owner
         self.grid = [[Cell(self.canvas, x, y, owner, click_callback) for y in range(GRID_SIZE)] for x in
                      range(GRID_SIZE)]
+        self.place_all_ships()
 
     def place_all_ships(self):
         for size, count in SHIP_SIZES.items():
@@ -74,14 +75,40 @@ class Board:
         return True
 
     def all_ships_destroy(self):
-        all()
+        return all(cell.hit or not cell.has_ship for row in self.grid for cell in row)
 
 class SeaBattleGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Sea")
+        self.turn = "player"
+        self.status = tk.Label(root, text="Ваш хід", font=("Arial", 15))
+        self.status.place(x=100, y=10)
         self.player_board = Board(root, "player", x_offset=50)
-        self.comp_board = Board(root, "comp", x_offset=400)
+        self.comp_board = Board(root, "computer", x_offset=400, click_callback=self.player_shot)
+    def player_shot(self, cell):
+        if self.turn != "player" or cell.hit:
+            return
+        cell.mark_hit(cell.has_ship)
+        if self.comp_board.all_ships_destroy():
+            self.status.config(text="You WIN")
+            return
+        self.turn = "computer"
+        self.status.config(text="ХІД ПК")
+        self.root.after(500, self.computer_shot)
+    def computer_shot(self):
+        availabel_cell = [cell for row in self.player_board.grid for cell in row if not  cell.hit]
+        if not availabel_cell:
+            self.status.config(text="Game Over")
+            return
+        cell = random.choice(availabel_cell)
+        cell.mark_hit(cell.has_ship)
+
+        if self.player_board.all_ships_destroy():
+            self.status.config(text="Comp WIN")
+        else:
+            self.turn = 'player'
+            self.status.config(text="Ваш ХІД")
 
 
 if __name__ == "__main__":
