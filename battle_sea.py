@@ -50,12 +50,12 @@ class Board:
     def try_place_ship(self, size):
         orientation = random.choice(["H", "V"])
         if orientation == "H":
-            x = random.randint(0, GRID_SIZE - size)
-            y = random.randint(0, GRID_SIZE - 1)
+            x = random.randint(1, GRID_SIZE - size)
+            y = random.randint(1, GRID_SIZE - 1)
             coords = [(x + i, y) for i in range(size)]
         else:
-            x = random.randint(0, GRID_SIZE - 1)
-            y = random.randint(0, GRID_SIZE - size)
+            x = random.randint(1, GRID_SIZE - 1)
+            y = random.randint(1, GRID_SIZE - size)
             coords = [(x, y + i) for i in range(size)]
 
         if any(self.grid[cx][cy].has_ship for cx, cy in coords):
