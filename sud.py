@@ -20,19 +20,43 @@ class SudokuBoard:
                     random.shuffle(nums)
                     for num in nums:
                         if self.is_valid(board, i, j, num):
-                            pass
+                            board[i][j] = num
+                            if self.solve_board(board):
+                                return True
+                            board[i][j] = 0
+                    return False
+        return False
 
     def is_valid(self, board, row, col, num):
-        pass
+        for i in range(9):
+            if board[row][i] == num or board[i][col] == num:
+                return False
+        box_x = (row // 3) * 3
+        box_y = (col // 3) * 3
+        for i in range(box_x, box_x+3):
+            for j in range(box_y, box_y+3):
+                if board[i][j] == num:
+                    return False
+        return True
 
-    def make_puzzle(self):
-        pass
+    def make_puzzle(self, empty=50):
+        puzzle = copy.deepcopy(self.board)
+        count = 0
+        while count < empty:
+            # Error
+            row = random.randint(0, 8)
+            col = random.randint(0, 8)
+            if puzzle[row][col] != 0:
+                puzzle[row][col] = 0
+                count +=1
+        return puzzle
 
 
 class SudokuGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Sudoku")
+        self.board = SudokuBoard()
         self.cells = {}
         self.user_input = {}
         self.draw_grid()
@@ -56,7 +80,15 @@ class SudokuGUI:
         exit_btn.pack(padx=10)
 
     def check_solution(self):
-        pass
+        temp_board = copy.deepcopy(self.board.puzzle)
+        for (row, col), label in self.cells.items():
+            if self.board.puzzle[row][col] == 0:
+                val = self.user_input.get((row, col), 0)
+                if val == 0:
+                    messagebox.showwarning("Error", "Поле не повністю заповнено")
+                    return
+            temp_board[row][col] = val
+        # STOP
 
     def cycle_number(self, row, col):
         pass
