@@ -19,11 +19,12 @@ class SudokuBoard:
                     nums = list(range(1, 9))
                     random.shuffle(nums)
                     for num in nums:
+                        print(nums)
                         if self.is_valid(board, i, j, num):
                             board[i][j] = num
                             if self.solve_board(board):
                                 return True
-                            board[i][j] = 0
+                            # board[i][j] = 0
                     return False
         return False
 
@@ -33,22 +34,21 @@ class SudokuBoard:
                 return False
         box_x = (row // 3) * 3
         box_y = (col // 3) * 3
-        for i in range(box_x, box_x+3):
-            for j in range(box_y, box_y+3):
+        for i in range(box_x, box_x + 3):
+            for j in range(box_y, box_y + 3):
                 if board[i][j] == num:
                     return False
         return True
 
-    def make_puzzle(self, empty=50):
+    def make_puzzle(self, emptys=50):
         puzzle = copy.deepcopy(self.board)
         count = 0
-        while count < empty:
-            # Error
+        while count < emptys:
             row = random.randint(0, 8)
             col = random.randint(0, 8)
             if puzzle[row][col] != 0:
                 puzzle[row][col] = 0
-                count +=1
+                count += 1
         return puzzle
 
 
@@ -68,8 +68,15 @@ class SudokuGUI:
                 frame = tk.Frame(self.root, width=200, height=200, borderwidth=1, relief="solid", bg="white")
                 frame.grid(row=i, column=j, padx=(1 if j % 3 == 0 else 0), pady=(1 if i % 3 == 0 else 0))
                 label = tk.Label(frame, text="", font=("Arial", 20), width=4, height=2)
-                label.pack()
+                label.pack(expand=True)
                 label.bind("<Button-1>", lambda e, row=i, col=j: self.cycle_number(row, col))
+                num = self.board.puzzle[i][j]
+                if num != 0:
+                    label.config(text=str(num), fg='black')
+                else:
+                    self.user_input[(i, j)] = 0
+                self.cells[(i, j)] = label
+
 
     def draw_buttons(self):
         btn_frame = tk.Frame(self.root)
@@ -87,11 +94,20 @@ class SudokuGUI:
                 if val == 0:
                     messagebox.showwarning("Error", "Поле не повністю заповнено")
                     return
-            temp_board[row][col] = val
-        # STOP
+                temp_board[row][col] = val
+        if self.board.solve_board(copy.deepcopy(temp_board)):
+            messagebox.showinfo("Вітаю", "Ви виграли")
+        else:
+            messagebox.showinfo("Error", "Вирішено не вірно")
 
     def cycle_number(self, row, col):
-        pass
+        if self.board.puzzle[row][col] != 0:
+            return
+        current = self.user_input.get((row, col), 0)
+        next_val = (current % 9) + 1 if current < 9 else 0
+        self.user_input[(row, col)] = next_val
+        label = self.cells[(row, col)]
+        label.config(text=str(next_val) if next_val != 0 else "0", fg="blue")
 
 
 if __name__ == "__main__":
