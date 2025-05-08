@@ -19,14 +19,13 @@ class SudokuBoard:
                     nums = list(range(1, 9))
                     random.shuffle(nums)
                     for num in nums:
-                        print(nums)
                         if self.is_valid(board, i, j, num):
                             board[i][j] = num
                             if self.solve_board(board):
                                 return True
-                            # board[i][j] = 0
+                            board[i][j] = 0
                     return False
-        return False
+        return True
 
     def is_valid(self, board, row, col, num):
         for i in range(9):
@@ -42,6 +41,7 @@ class SudokuBoard:
 
     def make_puzzle(self, emptys=50):
         puzzle = copy.deepcopy(self.board)
+        print(puzzle)
         count = 0
         while count < emptys:
             row = random.randint(0, 8)
@@ -87,6 +87,7 @@ class SudokuGUI:
         exit_btn.pack(padx=10)
 
     def check_solution(self):
+
         temp_board = copy.deepcopy(self.board.puzzle)
         for (row, col), label in self.cells.items():
             if self.board.puzzle[row][col] == 0:
