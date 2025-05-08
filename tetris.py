@@ -28,18 +28,18 @@ class Tetris:
         self.current = self.new_shape()
         self.next_shape = self.new_shape()
         self.root.bind("<Key>", self.key_press)
-        self.drop()
+        self.draw() # тут drop()
     def new_shape(self):
         shape = random.choice(list(SHAPES.keys()))
         color = COLORS[list(SHAPES.keys()).index(shape)]
-        blocks = SHAPES[shape[0]]
+        blocks = SHAPES[shape][0]
         return {"blocks": blocks, "x": COLS // 2, "y": 1, "color": color, "name": shape}
 
     def draw_block(self, x, y, color):
         x0, y0 = x * CELL, y * CELL
         self.canvas.create_rectangle(x0, y0, x0+CELL, y0+CELL, fill=color, outline="gray")
 
-    def drop(self):
+    def draw(self):
         self.canvas.delete("all")
         SIDE_X = (COLS + 2) * CELL
         self.canvas.create_text(SIDE_X, 1*CELL, text="Score:", fill="white", font=("Arial", 16))
@@ -47,9 +47,47 @@ class Tetris:
         self.canvas.create_text(SIDE_X, 4*CELL, text="Next:", fill="white", font=("Arial", 16))
         for y in range(ROWS):
             for x in range(COLS):
-                if self.board[y][x]
+                if self.board[y][x]:
+                    self.draw_block(x,y, self.board[y][x])
+        for dx, dy in self.current["blocks"]:
+            x = self.current['x'] + dx
+            y = self.current['y'] + dy
+            if y >= 0:
+                self.draw_block(x, y, self.current["color"])
+
+        for dx, dy in self.next_shape["blocks"]:
+            x = COLS + 1 + dx
+            y = 6 + dy
+            self.draw_block(x, y, self.next_shape["color"])
+
+    def valid_position(self, x, y, blocks):
+        for dx, dy in blocks:
+            new_x = x + dx
+            new_y = y + dy
+            if new_x < 0 or new_x >= COLS or new_y >= ROWS:
+                return False
+            if new_y >= 0 and self.board[new_y][new_x]:
+                return False
+        return True
+
+    def move(self, dx, dy):
+        if self.valid_position(self.current['x'] + dx, self.current['y'] + dy, self.current["blocks"]):
+            self.current['x'] += dx
+            self.current['y'] += dy
+            return True
+        return False
+
+    def rotate(self):
+        if self.current["blocks"] == SHAPES["O"][0]:
+            return
+        old_blocks = self.current["blocks"]
+        rotated = [(-dy, dx) for dx, dy in old_blocks]
+        if self.valid_position(self.current['x'], self.current['y'], rotated):
+            self.current['blocks'] = rotated
+
+
     def key_press(self):
-        pass
+        self.draw()
 
 
 
