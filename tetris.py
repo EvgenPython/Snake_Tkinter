@@ -28,7 +28,7 @@ class Tetris:
         self.current = self.new_shape()
         self.next_shape = self.new_shape()
         self.root.bind("<Key>", self.key_press)
-        self.draw() # тут drop()
+        self.drop() # тут drop()
     def new_shape(self):
         shape = random.choice(list(SHAPES.keys()))
         color = COLORS[list(SHAPES.keys()).index(shape)]
@@ -85,7 +85,14 @@ class Tetris:
         if self.valid_position(self.current['x'], self.current['y'], rotated):
             self.current['blocks'] = rotated
 
-
+    def drop(self):
+        if not self.game_over:
+            if not self.move(0, 1):
+                self.freeze()
+            self.draw()
+            self.root.after(DELAY, self.drop)
+    def freeze(self):
+        pass
     def key_press(self):
         self.draw()
 
